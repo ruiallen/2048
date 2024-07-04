@@ -140,6 +140,90 @@ class board():
                             break
         return
 
+
+    #after moving the blocks, now need to merge block together    
+    def merge_up(self):
+        #from top to bottom
+        for y in range(4):
+            x = 0
+            while x < 3:
+                to_merge = x+1
+                if self.get_value(x,y) == self.get_value(to_merge,y) and self.get_value(x,y)!=0: # need to merge
+                    val = self.get_value(x,y)
+                    self.set_value(x,y,val+val)
+                    self.set_value(to_merge,y,0)
+                    x+=2
+                else:
+                    x+=1
+        return
+    
+    def merge_down(self):
+        #from bottom to top
+        for y in range(4):
+            x = 3
+            while x>0:
+                to_merge = x-1
+                if self.get_value(x,y) == self.get_value(to_merge,y) and self.get_value(x,y)!=0: # need to merge
+                    val = self.get_value(x,y)
+                    self.set_value(x,y,val+val)
+                    self.set_value(to_merge,y,0)
+                    x-=2
+                else:
+                    x-=1
+        return
+
+    def merge_left(self):
+        #from left to right
+        for x in range(4):
+            y = 0
+            while y<3:
+                to_merge = y + 1
+                if self.get_value(x,y) == self.get_value(x,to_merge) and self.get_value(x,y)!=0: # need to merge
+                    val = self.get_value(x,y)
+                    self.set_value(x,y,val+val)
+                    self.set_value(x,to_merge,0)
+                    y+=1
+                else:
+                    y+=1                  
+        return 
+    
+    def merge_right(self):
+        #from right to left
+        for x in range(4):
+            y = 3
+            while y>0:
+                to_merge = y - 1
+                if self.get_value(x,y) == self.get_value(x,to_merge) and self.get_value(x,y)!=0: # need to merge
+                    val = self.get_value(x,y)
+                    self.set_value(x,y,val+val)
+                    self.set_value(x,to_merge,0)
+                    y-=2
+                else:
+                    y-=1                  
+        return 
+
+
+
+    def action(self,act):
+        if act == 'left':
+            self.move_left()
+            self.merge_left()
+            self.move_left()
+        elif act == 'right':
+            self.move_right()
+            self.merge_right()
+            self.move_right()
+        elif act == 'up':
+            self.move_up()
+            self.merge_up()
+            self.move_up()
+        else:
+            self.move_down()
+            self.merge_down()
+            self.move_down()
+
+    
+
 class block():
     def __init__(self, x,y,val):
         self.x = x
