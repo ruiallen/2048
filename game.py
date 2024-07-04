@@ -37,15 +37,108 @@ class App:
 
 
 class board():
-     def __init__(self):
-         self.board = (
-        [
-            [0,0,0,0],
-            [0,0,0,0],
-            [0,0,0,0],
-            [0,0,0,0],    
-         ])
+    #it's easier to move everything on board rather than moving individual squares.
+    #once moved, update all blocks accordingly and put them in the right coordinate.
+    # basically connect board with blocks 
+    def __init__(self):
+         self.board = [[0 for _ in range(4)] for _ in range(4) ]
     
+    def get_value(self,x,y):
+        return self.board[x][y]
+    
+    def set_value(self,x,y,val):
+        self.board[x][y] = val
+        return
+    
+    def get_empty_cell(self):
+        empty_list = []
+        for x in range(4):
+            for y in range(4):
+                if self.board[x][y] == 0:
+                    empty_list.append((x,y))
+        return empty_list
+    
+    def spawn_new_block(self):
+        import random
+        empty_list = self.get_empty_cell()
+        coord = random.choice(empty_list)
+        x,y = coord[0],coord[1]
+        self.board[x][y] = 2
+    
+
+    #define move operations
+    #first move all the blocks to the right place, then merge, then move again because possible empty cell appeasr
+    def move_up(self):
+        #from top to bottom
+        for y in range(4):
+            for x in range(1,4):
+                if self.get_value(x,y) != 0: #need to move this 
+                    val = self.get_value(x,y)
+                    dst = x - 1
+                    cur = x
+                    while dst>=0:
+                        if self.get_value(dst,y) == 0: # can move to this place
+                            self.set_value(dst,y,val)
+                            self.set_value(cur,y,0)
+                            dst-=1
+                            cur-=1
+                        else:
+                            break
+        return
+    
+    def move_down(self):
+        #from bottom to top
+        for y in range(4):
+            for x in range(2,-1,-1):
+                if self.get_value(x,y) != 0: #need to move this 
+                    val = self.get_value(x,y)
+                    dst = x + 1
+                    cur = x
+                    while dst<4:
+                        if self.get_value(dst,y) == 0: # can move to this place
+                            self.set_value(dst,y,val)
+                            self.set_value(cur,y,0)
+                            dst+=1
+                            cur+=1
+                        else:
+                            break
+        return
+    
+    def move_left(self):
+        #from left to right
+        for x in range(4):
+            for y in range(1,4):
+                if self.get_value(x,y) != 0: #need to move this 
+                    val = self.get_value(x,y)
+                    dst = y - 1
+                    cur = y
+                    while dst>=0:
+                        if self.get_value(x,dst) == 0: # can move to this place
+                            self.set_value(x,dst,val)
+                            self.set_value(x,cur,0)
+                            dst-=1
+                            cur-=1
+                        else:
+                            break
+        return 
+    
+    def move_right(self):
+        #from right to left
+        for x in range(4):
+            for y in range(2,-1,-1):
+                if self.get_value(x,y) != 0: #need to move this 
+                    val = self.get_value(x,y)
+                    dst = y + 1
+                    cur = y
+                    while dst<4:
+                        if self.get_value(x,dst) == 0: # can move to this place
+                            self.set_value(x,dst,val)
+                            self.set_value(x,cur,0)
+                            dst+=1
+                            cur+=1
+                        else:
+                            break
+        return
 
 class block():
     def __init__(self, x,y,val):
@@ -72,7 +165,9 @@ class game_GUI():
 
 
     def draw_board(self):
-        for x in range(0,self.width,100):
-            for y in range(0,self.height,100):
-                rect = pygame.Rect(x, y, 100, 100)
-                pygame.draw.rect(self.screen, (30, 222, 236), rect, width= 1, border_radius=1)
+        x_skip = self.width//4
+        y_skip = self.height//4
+        for x in range(0,self.width,x_skip):
+            for y in range(0,self.height,y_skip):
+                rect = pygame.Rect(x, y, x_skip,  y_skip)
+                pygame.draw.rect(self.screen, (30, 222, 236), rect, width= 5, border_radius=1)

@@ -18,8 +18,8 @@ WHITE = (255, 255, 255)
 # Screen information
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
- 
-DISPLAYSURF = pygame.display.set_mode((400,600))
+gui = game_GUI(400,600)
+screen = gui.screen
 #DISPLAYSURF.fill(WHITE)
 pygame.display.set_caption("Game")
 
@@ -30,8 +30,7 @@ while True:
             pygame.quit()
             sys.exit()
      
-    DISPLAYSURF.fill(WHITE)
-    rect = pygame.Rect(0, 0, 100, 100)
-    pygame.draw.rect(DISPLAYSURF, (30, 222, 236), rect, width= 10, border_radius=1)
+    screen.fill(WHITE)
+    gui.draw_board()
     pygame.display.update()
     FramePerSec.tick(FPS)
