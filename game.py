@@ -1,29 +1,41 @@
+import random
 import pygame
 import collections
 
-class App:
+class App():
+    #handles everything related to a game (initialize, exit etc.)
     def __init__(self):
         self._running = True
-        self._gui = None
-        self.size = self.weight, self.height = 640, 400
+        self._gui = game_GUI(600,400)
+        self.board = Board()
 
     def on_init(self):
         pygame.init()
-        self._gui = game_GUI(600,400)
-        self._gui.draw_board()
-        print('board_drew')
+        #print('board_drew')
         self._running = True
  
     def on_event(self, event):
         if event.type == pygame.QUIT:
             self._running = False
+        elif event.type == pygame.KEYDOWN:
+            self.press_key(event)
+
+
+    def press_key(self,event):
+        if event.key == pygame.K_UP:
+            self.board.action('up')
+        elif event.key == pygame.K_DOWN:
+            self.board.action('down')
+        elif event.key == pygame.K_LEFT:
+            self.board.action('left')
+        elif event.key == pygame.K_RIGHT:
+            self.board.action('right')
 
     def on_loop(self):
         pass
     def on_render(self):
-        pass
-    def on_cleanup(self):
-        pygame.quit()
+        self._gui.draw_board(self.board)
+        pygame.display.update()
  
     def on_execute(self):
         if self.on_init() == False:
@@ -31,24 +43,30 @@ class App:
         while( self._running ):
             for event in pygame.event.get():
                 self.on_event(event)
-            self.on_loop()
+            #self.on_loop()
             self.on_render()
         self.on_cleanup()
 
 
-class board():
+class Board():
+    import random
     #it's easier to move everything on board rather than moving individual squares.
     #once moved, update all blocks accordingly and put them in the right coordinate.
     # basically connect board with blocks 
     def __init__(self):
-         self.board = [[0 for _ in range(4)] for _ in range(4) ]
-    
+        self.board = [[0 for _ in range(4)] for _ in range(4) ]
+        cnt = 0
+        while cnt<2:
+            x1,y1 = random.randint(0,3),random.randint(0,3)
+            if self.board[x1][y1] == 0:
+                self.board[x1][y1] = 2
+                cnt+=1
+            else:continue
     def get_value(self,x,y):
         return self.board[x][y]
     
     def set_value(self,x,y,val):
         self.board[x][y] = val
-        return
     
     def get_empty_cell(self):
         empty_list = []
@@ -59,7 +77,6 @@ class board():
         return empty_list
     
     def spawn_new_block(self):
-        import random
         empty_list = self.get_empty_cell()
         coord = random.choice(empty_list)
         x,y = coord[0],coord[1]
@@ -84,8 +101,7 @@ class board():
                             cur-=1
                         else:
                             break
-        return
-    
+        
     def move_down(self):
         #from bottom to top
         for y in range(4):
@@ -102,8 +118,7 @@ class board():
                             cur+=1
                         else:
                             break
-        return
-    
+        
     def move_left(self):
         #from left to right
         for x in range(4):
@@ -120,8 +135,7 @@ class board():
                             cur-=1
                         else:
                             break
-        return 
-    
+           
     def move_right(self):
         #from right to left
         for x in range(4):
@@ -138,9 +152,7 @@ class board():
                             cur+=1
                         else:
                             break
-        return
-
-
+        
     #after moving the blocks, now need to merge block together    
     def merge_up(self):
         #from top to bottom
@@ -155,7 +167,6 @@ class board():
                     x+=2
                 else:
                     x+=1
-        return
     
     def merge_down(self):
         #from bottom to top
@@ -170,7 +181,6 @@ class board():
                     x-=2
                 else:
                     x-=1
-        return
 
     def merge_left(self):
         #from left to right
@@ -185,8 +195,7 @@ class board():
                     y+=1
                 else:
                     y+=1                  
-        return 
-    
+         
     def merge_right(self):
         #from right to left
         for x in range(4):
@@ -200,9 +209,13 @@ class board():
                     y-=2
                 else:
                     y-=1                  
-        return 
-
-
+         
+    def check_full(self):
+        for x in range(4):
+            for y in range(4):
+                if self.board[x][y] == 0:
+                    return False
+        return True
 
     def action(self,act):
         if act == 'left':
@@ -221,37 +234,31 @@ class board():
             self.move_down()
             self.merge_down()
             self.move_down()
+        self.spawn_new_block()
 
-    
-
-class block():
-    def __init__(self, x,y,val):
-        self.x = x
-        self.y = y
-        self.val = val
-    
-    def move_up(self):
-        pass
-
-    def move_down(self):
-        pass
-    def move_left(self):
-        pass
-    def move_right(self):
-        pass
 
 class game_GUI():
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode((self.width, self.height))
-        self.screen.fill((30, 222, 236))
+        self.screen.fill((255, 255, 255))
 
-
-    def draw_board(self):
+    
+    def draw_board(self,board):
+        #cannot find a elegant way to update the whole screen
+        self.screen.fill((255, 255, 255))
+        print(board.board)
+        sysfont = pygame.font.SysFont(None, 30)
         x_skip = self.width//4
         y_skip = self.height//4
-        for x in range(0,self.width,x_skip):
-            for y in range(0,self.height,y_skip):
-                rect = pygame.Rect(x, y, x_skip,  y_skip)
-                pygame.draw.rect(self.screen, (30, 222, 236), rect, width= 5, border_radius=1)
+        for x in range(4):
+            for y in range(4):
+                #left and top, so y and x actually
+                block = pygame.Rect(y*x_skip, x*y_skip, x_skip,  y_skip)
+                pygame.draw.rect(self.screen, (30, 222, 236), block, width = 5 )
+                if board.board[x][y] != 0:
+                    text = sysfont.render("{}".format(board.board[x][y]),True,(0,0,0))
+                    text_coord = text.get_rect(center=(block.centerx, block.centery))
+                    self.screen.blit(text,text_coord)
+        #pygame.display.update()
