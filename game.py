@@ -45,8 +45,7 @@ class App():
                     raise Exception('not a valid input')
             elif self._gui.window == 'result':
                 if event.key == pygame.K_n:
-                    pygame.quit()
-                    sys.exit()    
+                    self._running = False
                 elif event.key == pygame.K_RETURN:
                     self._gui.window = 'main_menu'
                 else:
