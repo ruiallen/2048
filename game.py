@@ -1,41 +1,18 @@
 import random
 import pygame
-import collections
 import time
 import sys
 class App():
     #handles everything related to a game (initialize, exit etc.)
     #main running unit
     def __init__(self):
-        pygame.init()
         self._running = True
-<<<<<<< Updated upstream
-        self._gui = game_GUI(600,400)
-        self.board = Board()
-        self.restart = False
-
-    def press_key(self,event):
-        #key events during the game run
-        try:
-            if event.key == pygame.K_UP:
-                self.board.action('up')
-            elif event.key == pygame.K_DOWN:
-                self.board.action('down')
-            elif event.key == pygame.K_LEFT:
-                self.board.action('left')
-            elif event.key == pygame.K_RIGHT:
-                self.board.action('right')
-            elif event.key == pygame.K_r:
-                self.restart = True
-            else:
-                raise Exception('not a valid input')
-=======
         self.board = Board()
         self._gui = game_GUI(800,600)
         self.restart = False
 
     def press_key(self,event):
-        #handle buton down events and exception handling
+        #handle button movements
         try:
             if self._gui.window == 'run':
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
@@ -74,19 +51,21 @@ class App():
                     self._gui.window = 'main_menu'
                 else:
                     raise Exception('not a valid input')
->>>>>>> Stashed changes
         except Exception as e:
             self._gui.display_msg(e)
             pygame.display.update()
             time.sleep(0.16)
         finally:
-            #go back to the previous display 
             self.on_render()
+        
+
     def on_render(self):
         if self._gui.window == 'main_menu':
-            self._gui.show_main_menu()
             #when at the main menu, initialize the board
             self.board = Board()
+            self._gui.show_main_menu()
+        if self._gui.window == 'set_difficulty':
+            self._gui.set_difficulty(self.board)
         if self._gui.window == 'run':
             self._gui.draw_board(self.board)
             self._gui.draw_boarder()
@@ -131,11 +110,7 @@ class Board():
         self.score = 0
         self.loseFlag = False
         self.winFlag = False
-<<<<<<< Updated upstream
-        self.target = 32
-=======
-        self.target = 8
->>>>>>> Stashed changes
+        self.target = 2048
         self.moves = 0
         
     def get_value(self,x,y):
@@ -144,15 +119,12 @@ class Board():
     def set_value(self,x,y,val):
         self.board[x][y] = val
     
-<<<<<<< Updated upstream
-=======
     def get_target(self):
         return self.target
     
     def set_target(self,val):
         self.target = val
 
->>>>>>> Stashed changes
     def get_empty_cell(self):
         empty_list = []
         for x in range(4):
@@ -322,21 +294,14 @@ class Board():
             self.move_down()
             self.merge_down()
             self.move_down()
-<<<<<<< Updated upstream
-        win = self.check_win(64)
-        if win: self.winFlag = True
-        fail = self.check_fail()
-        if not fail:
-=======
         #check if the game should be eneded at the end of each action
         if self.check_win(): self.winFlag = True
         if not self.check_fail():
->>>>>>> Stashed changes
             if not self.check_full():
                 self.spawn_new_block()
         else:self.loseFlag = True
 
-    def check_win(self,target):
+    def check_win(self):
         return self.score >= self.target
 
     def check_fail(self):
@@ -411,31 +376,10 @@ class game_GUI():
             self.window = 'result'
 
     
+   
     def show_main_menu(self):
         #main menu display
         self.screen.fill((238, 228, 218))
-<<<<<<< Updated upstream
-        loseText = pygame.font.SysFont('Purisa', 90).render(
-            "2048 Game", True, (119, 110, 101))
-        loseCoord = loseText.get_rect(center = (self.width/2, self.height/2))
-        self.screen.blit(loseText,loseCoord)
-        time.sleep(0.5)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    self.window = 'run'
-
-
-    def show_result(self,msg):
-        time.sleep(0.5)
-        #self.screen.fill((238, 228, 218))
-        loseText = pygame.font.SysFont('Purisa', 90).render("{}".format(msg), True, (119, 110, 101))
-        loseCoord = loseText.get_rect(center = (self.width/2, self.height/2))
-        againText = pygame.font.SysFont('Purisa', 30).render(
-            "Press y or Enter to try again, or n to quit", True, (119, 110, 101))
-=======
         welcomeText = pygame.font.SysFont('Purisa', 80,bold = True).render("2048 Game", True, (119, 110, 101))
         welcomeCoord = welcomeText.get_rect(center = (0.5*self.width, 0.2*self.height))
         welcomeText2 = pygame.font.SysFont('Purisa', 50).render("by Ruihan Wang", True, (119, 110, 101))
@@ -443,7 +387,7 @@ class game_GUI():
         self.screen.blit(welcomeText,welcomeCoord)
         self.screen.blit(welcomeText2,welcomeCoord2)
         welcomeText4 = pygame.font.SysFont('Purisa', 50).render("Press Enter to Continue", True, (119, 110, 101))
-        welcomeCoord4 = welcomeText.get_rect(center = (0.5*self.width, 0.9*self.height))
+        welcomeCoord4 = welcomeText.get_rect(center = (0.35*self.width, 0.9*self.height))
         self.screen.blit(welcomeText4,welcomeCoord4)
                 
     def set_difficulty(self,board): 
@@ -484,27 +428,11 @@ class game_GUI():
         loseCoord = loseText.get_rect(center = (self.width/2, self.height/2))
         againText = pygame.font.SysFont('Purisa', 30).render(
             "Press n to quit or Enter to restart", True, (119, 110, 101))
->>>>>>> Stashed changes
         againCoord = loseText.get_rect(center = (self.width/2, 2*self.height/3))
         self.screen.blit(loseText,loseCoord)
         self.screen.blit(againText,againCoord)
-<<<<<<< Updated upstream
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN or event.key == pygame.K_y:
-                    self.window = 'main_menu'
-                elif event.key == pygame.K_n:
-                    pygame.quit()
-                    sys.exit()
-                
-    
-=======
                 
 
->>>>>>> Stashed changes
     def display_msg(self,msg):
         #To display an error message
         text = pygame.font.SysFont('Purisa', 70).render("{}".format(msg), True, (119, 110, 101))
