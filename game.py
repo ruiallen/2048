@@ -9,6 +9,7 @@ class App():
     def __init__(self):
         pygame.init()
         self._running = True
+<<<<<<< Updated upstream
         self._gui = game_GUI(600,400)
         self.board = Board()
         self.restart = False
@@ -28,14 +29,59 @@ class App():
                 self.restart = True
             else:
                 raise Exception('not a valid input')
+=======
+        self.board = Board()
+        self._gui = game_GUI(800,600)
+        self.restart = False
+
+    def press_key(self,event):
+        #handle buton down events and exception handling
+        try:
+            if self._gui.window == 'run':
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    self.board.action('up')
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    self.board.action('down')
+                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    self.board.action('left')
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    self.board.action('right')
+                elif event.key == pygame.K_r:
+                    self.restart = True
+                else:
+                    raise Exception('not a valid input')
+            elif self._gui.window == 'main_menu':
+                if event.key == pygame.K_RETURN:
+                    self._gui.window = 'set_difficulty' 
+                else:
+                    raise Exception('not a valid input')
+            elif self._gui.window == 'set_difficulty':
+                if event.key == pygame.K_1:
+                    self.board.set_target(32)
+                elif event.key == pygame.K_2:
+                    self.board.set_target(512)
+                elif event.key == pygame.K_3:
+                    self.board.set_target(2048)
+                elif event.key == pygame.K_RETURN:
+                    self._gui.window = 'run' 
+                else:
+                    raise Exception('not a valid input')
+            elif self._gui.window == 'result':
+                if event.key == pygame.K_n:
+                    pygame.quit()
+                    sys.exit()    
+                elif event.key == pygame.K_RETURN:
+                    self._gui.window = 'main_menu'
+                else:
+                    raise Exception('not a valid input')
+>>>>>>> Stashed changes
         except Exception as e:
             self._gui.display_msg(e)
             pygame.display.update()
-            time.sleep(0.3)
-            #go back to the previous display
+            time.sleep(0.16)
+        finally:
+            #go back to the previous display 
             self.on_render()
-        
-
     def on_render(self):
         if self._gui.window == 'main_menu':
             self._gui.show_main_menu()
@@ -43,13 +89,16 @@ class App():
             self.board = Board()
         if self._gui.window == 'run':
             self._gui.draw_board(self.board)
-            if self.board.winFlag:
-                self._gui.show_result("Congratulations!")
+            self._gui.draw_boarder()
+            
+        if self._gui.window == 'result':
             if self.board.loseFlag:
-                self._gui.show_result("Game Over.")
+                self._gui.show_result("Game Over.",self.board)
+            elif self.board.winFlag:
+                self._gui.show_result("Congratulations!",self.board)
         pygame.display.update()
     
-    def on_cleanup():
+    def on_cleanup(self):
         pygame.quit()
         sys.exit()
 
@@ -82,7 +131,11 @@ class Board():
         self.score = 0
         self.loseFlag = False
         self.winFlag = False
+<<<<<<< Updated upstream
         self.target = 32
+=======
+        self.target = 8
+>>>>>>> Stashed changes
         self.moves = 0
         
     def get_value(self,x,y):
@@ -91,6 +144,15 @@ class Board():
     def set_value(self,x,y,val):
         self.board[x][y] = val
     
+<<<<<<< Updated upstream
+=======
+    def get_target(self):
+        return self.target
+    
+    def set_target(self,val):
+        self.target = val
+
+>>>>>>> Stashed changes
     def get_empty_cell(self):
         empty_list = []
         for x in range(4):
@@ -205,6 +267,7 @@ class Board():
                     x-=2
                 else:
                     x-=1
+
     def merge_left(self):
         #from left to right
         for x in range(4):
@@ -259,10 +322,16 @@ class Board():
             self.move_down()
             self.merge_down()
             self.move_down()
+<<<<<<< Updated upstream
         win = self.check_win(64)
         if win: self.winFlag = True
         fail = self.check_fail()
         if not fail:
+=======
+        #check if the game should be eneded at the end of each action
+        if self.check_win(): self.winFlag = True
+        if not self.check_fail():
+>>>>>>> Stashed changes
             if not self.check_full():
                 self.spawn_new_block()
         else:self.loseFlag = True
@@ -309,18 +378,23 @@ class game_GUI():
         2048: (237,194,46)
     }
         
-    def draw_board(self,board):
-        #cannot find a elegant way to update the whole screen
-        colorList = self.blockColor
-        self.screen.fill((255, 255, 255))
+    def draw_boarder(self):
         sysFont = pygame.font.SysFont(None, 30)
         x_skip = self.width//4
         y_skip = self.height//4
         for x in range(4):
             for y in range(4):
-                #draw boardes
-                boarder = pygame.Rect(x*x_skip, y*y_skip, x_skip,  y_skip)
-                pygame.draw.rect(self.screen, color=colorList[0], rect=boarder, width = 10)
+                #draw boarders
+                boarder = pygame.Rect(y*x_skip, x*y_skip, x_skip,  y_skip)
+                pygame.draw.rect(self.screen, color=(204,192,179), rect=boarder, width = 10)
+
+    def draw_board(self,board):
+        #display the curent board on screen
+        colorList = self.blockColor
+        self.screen.fill((255, 255, 255))
+        sysFont = pygame.font.SysFont(None, 30)
+        x_skip = self.width//4
+        y_skip = self.height//4
         for x in range(4):
             for y in range(4):
                 #left and top, so y and x actually
@@ -330,9 +404,17 @@ class game_GUI():
                     text = sysFont.render("{}".format(board.board[x][y]),True,(0,0,0))
                     textCoord = text.get_rect(center=(block.centerx, block.centery))
                     self.screen.blit(text,textCoord)
+        #update the display flag if ended
+        if board.winFlag:
+            self.window = 'result'
+        if board.loseFlag:
+            self.window = 'result'
+
     
     def show_main_menu(self):
+        #main menu display
         self.screen.fill((238, 228, 218))
+<<<<<<< Updated upstream
         loseText = pygame.font.SysFont('Purisa', 90).render(
             "2048 Game", True, (119, 110, 101))
         loseCoord = loseText.get_rect(center = (self.width/2, self.height/2))
@@ -353,10 +435,60 @@ class game_GUI():
         loseCoord = loseText.get_rect(center = (self.width/2, self.height/2))
         againText = pygame.font.SysFont('Purisa', 30).render(
             "Press y or Enter to try again, or n to quit", True, (119, 110, 101))
-        againCoord = loseText.get_rect(center = (self.width/2, 2*self.height/3))
+=======
+        welcomeText = pygame.font.SysFont('Purisa', 80,bold = True).render("2048 Game", True, (119, 110, 101))
+        welcomeCoord = welcomeText.get_rect(center = (0.5*self.width, 0.2*self.height))
+        welcomeText2 = pygame.font.SysFont('Purisa', 50).render("by Ruihan Wang", True, (119, 110, 101))
+        welcomeCoord2 = welcomeText.get_rect(center = (0.7*self.width, 0.4*self.height))
+        self.screen.blit(welcomeText,welcomeCoord)
+        self.screen.blit(welcomeText2,welcomeCoord2)
+        welcomeText4 = pygame.font.SysFont('Purisa', 50).render("Press Enter to Continue", True, (119, 110, 101))
+        welcomeCoord4 = welcomeText.get_rect(center = (0.5*self.width, 0.9*self.height))
+        self.screen.blit(welcomeText4,welcomeCoord4)
+                
+    def set_difficulty(self,board): 
+        #difficulty setting display
+        self.screen.fill((238, 228, 218))
+        welcomeText3 = pygame.font.SysFont('Serif', 30,italic=True).render("Select a difficulty (Current: {})".format(board.get_target()), True, (119, 110, 101))
+        welcomeCoord3 = welcomeText3.get_rect(center = (0.5*self.width, 0.3*self.height))
+        self.screen.blit(welcomeText3,welcomeCoord3)
 
+        welcomeText3 = pygame.font.SysFont('Serif', 30,italic=True).render("Press 1, 2 or 3 to select".format(board.get_target()), True, (119, 110, 101))
+        welcomeCoord3 = welcomeText3.get_rect(center = (0.5*self.width, 0.4*self.height))
+        self.screen.blit(welcomeText3,welcomeCoord3)
+
+        difficultyText1 = pygame.font.SysFont('Purisa', 50).render("32", True, (119, 110, 101))
+        difficultyCoord1 = difficultyText1.get_rect(center = (0.3*self.width, 0.6*self.height))
+        pygame.draw.rect(self.screen,(0, 0, 0),rect = difficultyCoord1, width = 2)
+        self.screen.blit(difficultyText1,difficultyCoord1)
+
+        difficultyText2 = pygame.font.SysFont('Purisa', 35).render("512", True, (119, 110, 101))
+        difficultyCoord2 = difficultyText1.get_rect(center = (0.5*self.width, 0.6*self.height))
+        pygame.draw.rect(self.screen,(0, 0, 0),rect = difficultyCoord2, width = 2)
+        self.screen.blit(difficultyText2,difficultyCoord2)
+
+        difficultyText3 = pygame.font.SysFont('Purisa', 25).render("2048", True, (119, 110, 101))
+        difficultyCoord3 = difficultyText1.get_rect(center = (0.7*self.width, 0.6*self.height))
+        pygame.draw.rect(self.screen,(0, 0, 0),rect = difficultyCoord3, width = 2)
+        self.screen.blit(difficultyText3,difficultyCoord3)
+
+        welcomeText4 = pygame.font.SysFont('Purisa', 50).render("Press Enter to start", True, (119, 110, 101))
+        welcomeCoord4 = welcomeText4.get_rect(center = (0.5*self.width, 0.9*self.height))
+        self.screen.blit(welcomeText4,welcomeCoord4)
+        time.sleep(0.2)
+            
+    def show_result(self,msg,board):
+        self.draw_board(board)
+        self.draw_boarder()
+        loseText = pygame.font.SysFont('Purisa', 90).render("{}".format(msg), True, (119, 110, 101))
+        loseCoord = loseText.get_rect(center = (self.width/2, self.height/2))
+        againText = pygame.font.SysFont('Purisa', 30).render(
+            "Press n to quit or Enter to restart", True, (119, 110, 101))
+>>>>>>> Stashed changes
+        againCoord = loseText.get_rect(center = (self.width/2, 2*self.height/3))
         self.screen.blit(loseText,loseCoord)
         self.screen.blit(againText,againCoord)
+<<<<<<< Updated upstream
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -369,10 +501,14 @@ class game_GUI():
                     sys.exit()
                 
     
+=======
+                
+
+>>>>>>> Stashed changes
     def display_msg(self,msg):
-        #To display a message on screen for a short time
-        text = pygame.font.SysFont('Purisa', 90).render("{}".format(msg), True, (119, 110, 101))
-        textCoord = text.get_rect(center = (self.width/2, self.height/2))
+        #To display an error message
+        text = pygame.font.SysFont('Purisa', 70).render("{}".format(msg), True, (119, 110, 101))
+        textCoord = text.get_rect(center = (self.width/2, 0.1*self.height))
         self.screen.blit(text,textCoord)
 
 
